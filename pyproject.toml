@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "unslop"
+version = "0.1.0"
+description = "A simple starter framework for the unslop Python library."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "unslop" }]
+license = { file = "LICENSE" }
+keywords = ["template", "library"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  "openai>=1.0.0",
+  "pathspec>=0.12.1",
+  "pywebview>=4.3.2",
+  "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "black>=24.3.0",
+  "ruff>=0.3.0",
+  "pytest>=8.1.0",
+]
+
+[project.urls]
+Homepage = "https://example.com/unslop"
+Issues = "https://example.com/unslop/issues"
+
+[project.scripts]
+unslop = "unslop.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/unslop"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+select = ["E", "F", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
