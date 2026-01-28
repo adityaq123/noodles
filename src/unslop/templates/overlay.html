@@ -226,7 +226,8 @@
             <li><span class="d2-icon"><svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 31.1109C24.3456 31.1109 31.1111 24.3454 31.1111 15.9998C31.1111 7.65415 24.3456 0.888672 16 0.888672C7.65436 0.888672 0.888885 7.65415 0.888885 15.9998C0.888885 24.3454 7.65436 31.1109 16 31.1109Z" fill="white" stroke="#DEE1EB"/><path d="M16 26C21.5228 26 26 21.5228 26 16C26 10.4772 21.5228 6 16 6C10.4772 6 6 10.4772 6 16C6 21.5228 10.4772 26 16 26Z" stroke="#2E3346" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 19.998V15.998" stroke="#2E3346" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 12H16.0098" stroke="#2E3346" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span> hover to see tooltips</li>
             <li><span style="color:#2E8B57">Green</span> stroke indicates an added node</li>
             <li><span style="color:#D97706">Orange</span> stroke indicates an updated node</li>
-            <li>Press <kbd>Esc</kbd> to return to the main diagram</li>
+            <li>Press <kbd>Esc</kbd> to return to the previous diagram</li>
+            <li>Double-press <kbd>Esc</kbd> to return to the main diagram</li>
             <li>Use <kbd>Ctrl</kbd> + scroll to zoom, or use trackpad</li>
           </ul>
         </div>
@@ -268,6 +269,11 @@
       let hoverTarget = null;
       let lastOverviewPayload = null;
       let lastOverviewPath = '';
+      let currentDiagramPayload = null;
+      const diagramHistory = [];
+      let escTimer = null;
+      let lastEscTime = 0;
+      const escDoubleThresholdMs = 200;
       const timerState = {
         overview: { start: 0, interval: null, el: null, lastElapsed: 0 },
         node: { start: 0, interval: null, el: null, lastElapsed: 0 },
@@ -501,9 +507,25 @@
       });
 
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
+        if (e.key !== 'Escape') return;
+        const now = Date.now();
+        if (now - lastEscTime <= escDoubleThresholdMs) {
+          if (escTimer) {
+            clearTimeout(escTimer);
+            escTimer = null;
+          }
+          lastEscTime = 0;
           renderOverviewDiagram();
+          return;
         }
+        lastEscTime = now;
+        if (escTimer) {
+          clearTimeout(escTimer);
+        }
+        escTimer = setTimeout(() => {
+          escTimer = null;
+          renderPreviousDiagram();
+        }, escDoubleThresholdMs + 20);
       });
 
       async function chooseFolder() {
@@ -611,24 +633,31 @@
         if (payload.svg_inline) {
           setDiagram(payload.svg_inline);
           resetZoom();
+          currentDiagramPayload = payload;
           return;
         }
         if (payload.svg) {
           setImage(payload.svg);
           resetZoom();
+          currentDiagramPayload = payload;
           return;
         }
         if (payload.error) {
+          currentDiagramPayload = payload;
           return;
         }
         clearDiagram();
         resetZoom();
+        currentDiagramPayload = payload;
       }
 
       async function loadNodeDiagram(nodeId) {
         if (!lastOverviewPath) {
           console.warn('[unslop overlay] No overview diagram path available.');
           return;
+        }
+        if (currentDiagramPayload) {
+          diagramHistory.push(currentDiagramPayload);
         }
         try {
           const res = await window.pywebview.api.load_node_diagram(nodeId, lastOverviewPath);
@@ -651,9 +680,19 @@
           logMessage('No overview diagram cached.');
           return;
         }
+        diagramHistory.length = 0;
         applyDiagramPayload(lastOverviewPayload);
       }
 
+      function renderPreviousDiagram() {
+        if (!diagramHistory.length) {
+          logMessage('No previous diagram cached.');
+          return;
+        }
+        const prev = diagramHistory.pop();
+        applyDiagramPayload(prev);
+      }
+      
       window.__unslopUpdate = (payload) => {
         if (!payload) return;
         if (payload.type === 'loading') {
