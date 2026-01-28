@@ -4,8 +4,39 @@ import logging
 from pathlib import Path
 from openai import OpenAI
 from openai import AsyncOpenAI
+try:
+    from openai import AuthenticationError
+except Exception:  # pragma: no cover - defensive fallback
+    class AuthenticationError(Exception):
+        pass
 
 logger = logging.getLogger(__name__)
+_LAST_API_KEY_STATUS: str | None = None
+
+
+def _report_api_key_status(status: str) -> None:
+    global _LAST_API_KEY_STATUS
+    if status == _LAST_API_KEY_STATUS:
+        return
+    _LAST_API_KEY_STATUS = status
+    logger.warning(
+        "OpenAI API key status: %s",
+        status,
+        extra={"unslop_api_key_status": status},
+    )
+
+
+def _maybe_report_auth_error(exc: Exception) -> None:
+    if isinstance(exc, AuthenticationError):
+        _report_api_key_status("invalid")
+        return
+    status_code = getattr(exc, "status_code", None)
+    if status_code == 401:
+        _report_api_key_status("invalid")
+        return
+    text = str(exc)
+    if "invalid_api_key" in text or "Incorrect API key" in text:
+        _report_api_key_status("invalid")
 
 def _overview_prompt() -> str:
     return (
@@ -47,15 +78,19 @@ def generate_overview_schema(combined, model="gpt-4.1"):
     client = OpenAI()
     prompt = _overview_prompt()
 
-    resp = client.responses.create(
-        model=model,
-        input=[
-            {"role": "system", "content": "You are a precise code analyst."},
-            {"role": "user", "content": prompt + "\n\n" + combined},
-        ],
-        text={"format": {"type": "json_object"}},
-    )
-
+    try:
+        resp = client.responses.create(
+            model=model,
+            input=[
+                {"role": "system", "content": "You are a precise code analyst."},
+                {"role": "user", "content": prompt + "\n\n" + combined},
+            ],
+            text={"format": {"type": "json_object"}},
+        )
+    except Exception as exc:
+        _maybe_report_auth_error(exc)
+        raise
+    _report_api_key_status("valid")
     return resp.output_text
 
 
@@ -77,24 +112,28 @@ def update_overview_schema(combined, model="gpt-4.1", previous_schema=""):
         " that are not affected by changes."
     )
 
-    resp = client.responses.create(
-        model=model,
-        input=[
-            {"role": "system", "content": "You are a precise code analyst."},
-            {
-                "role": "user",
-                "content": (
-                    prompt
-                    + "\n\nPREVIOUS_SCHEMA_JSON:\n"
-                    + (previous_schema or "")
-                    + "\n\nCHANGED_FILES:\n"
-                    + combined
-                ),
-            },
-        ],
-        text={"format": {"type": "json_object"}},
-    )
-
+    try:
+        resp = client.responses.create(
+            model=model,
+            input=[
+                {"role": "system", "content": "You are a precise code analyst."},
+                {
+                    "role": "user",
+                    "content": (
+                        prompt
+                        + "\n\nPREVIOUS_SCHEMA_JSON:\n"
+                        + (previous_schema or "")
+                        + "\n\nCHANGED_FILES:\n"
+                        + combined
+                    ),
+                },
+            ],
+            text={"format": {"type": "json_object"}},
+        )
+    except Exception as exc:
+        _maybe_report_auth_error(exc)
+        raise
+    _report_api_key_status("valid")
     return resp.output_text
 
 
@@ -124,7 +163,22 @@ def get_overview_d2_diagram(schema_path, output_dir=None):
         raw_id = node.get("id", "")
         d2_id = raw_id
         id_map[raw_id] = d2_id
-        label = escape_label(node.get("name", raw_id))
+        label_base = node.get("name", raw_id)
+        status = (node.get("status") or "").lower()
+        status_tag = ""
+        status_stroke = ""
+        status_font = ""
+        if status == "added":
+            status_tag = "[added]"
+            status_stroke = "#2E8B57"
+            status_font = "#2E8B57"
+        elif status == "updated":
+            status_tag = "[updated]"
+            status_stroke = "#D97706"
+            status_font = "#D97706"
+        if status_tag:
+            label_base = f"{label_base}\\n{status_tag}"
+        label = escape_label(label_base)
         node_type = node.get("type", "")
         tooltip = escape_label(node.get("description") or raw_id)
         fill = ""
@@ -143,6 +197,11 @@ def get_overview_d2_diagram(schema_path, output_dir=None):
         lines.append(f'{d2_id}.link: "unslop://node/{escape_label(raw_id)}"')
         if fill:
             lines.append(f'{d2_id}.style.fill: "{fill}"')
+        if status_stroke:
+            lines.append(f'{d2_id}.style.stroke: "{status_stroke}"')
+            lines.append(f'{d2_id}.style.stroke-width: 10')
+        if status_font:
+            lines.append(f'{d2_id}.style.font-color: "{status_font}"')
 
     seen_edges = set()
     for flow in flows:
@@ -295,14 +354,19 @@ async def generate_node_schema_and_diagram(
             " ID rules:"
             " - ids must contain only lowercase letters and underscores."
         )
-        resp = await client.responses.create(
-            model=model,
-            input=[
-                {"role": "system", "content": "You are a precise code analyst."},
-                {"role": "user", "content": prompt + "\n\nNODE CONTEXT:\n" + payload},
-            ],
-            text={"format": {"type": "json_object"}},
-        )
+        try:
+            resp = await client.responses.create(
+                model=model,
+                input=[
+                    {"role": "system", "content": "You are a precise code analyst."},
+                    {"role": "user", "content": prompt + "\n\nNODE CONTEXT:\n" + payload},
+                ],
+                text={"format": {"type": "json_object"}},
+            )
+        except Exception as exc:
+            _maybe_report_auth_error(exc)
+            raise
+        _report_api_key_status("valid")
         return {"id": node_id, "json": resp.output_text}
     
     node_contexts = extract_code_context()
