@@ -115,9 +115,9 @@ def _run_command() -> int | None:
 def _check_requirements() -> bool:
     """Ensure required dependencies are present before running."""
     missing = False
-    if not (os.getenv("OPENAI_API_KEY") or os.getenv("UNSLOP_OPENAI_API_KEY")):
-        logger.warning("Missing OpenAI API key.")
-        logger.warning('Run: export OPENAI_API_KEY="your-openai-key"')
+    if not (os.getenv("OPENAI_API_KEY") or os.getenv("UNSLOP_OPENAI_API_KEY") or os.getenv("GEMINI_API_KEY")):
+        logger.warning("Missing API key (OpenAI or Gemini).")
+        logger.warning('Run: export OPENAI_API_KEY="..." OR export GEMINI_API_KEY="..."')
     if not find_d2_bin():
         logger.warning("Missing d2 CLI.")
         logger.warning("Run: brew install d2")
