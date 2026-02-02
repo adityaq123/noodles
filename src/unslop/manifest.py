@@ -147,6 +147,8 @@ def _should_skip(relative: Path, gitignore: PathSpec | None, *, is_dir: bool) ->
     """Return True if the relative path should be excluded."""
     if _is_hidden(relative):
         return True
+    if _is_dependency_or_build(relative):
+        return True
     if not is_dir and _is_asset(relative):
         return True
     if not is_dir and _is_non_logic(relative):
@@ -164,7 +166,26 @@ def _is_hidden(relative: Path) -> bool:
     for part in relative.parts:
         if part in {"", "."}:
             continue
-        if part.startswith("."):
+        if part.startswith(".") and part not in {".unslop"}:
+            return True
+    return False
+
+
+def _is_dependency_or_build(relative: Path) -> bool:
+    """Return True if the path is inside a dependency or build directory."""
+    blacklisted = {
+        "node_modules",
+        "dist",
+        "build",
+        ".turbo",
+        ".next",
+        "out",
+        "venv",
+        ".venv",
+        "target",
+    }
+    for part in relative.parts:
+        if part in blacklisted:
             return True
     return False
 
