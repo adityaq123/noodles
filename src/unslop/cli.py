@@ -144,8 +144,7 @@ def _launch_overlay_and_wait(
     updates_queue: multiprocessing.Queue[dict | None] | None = None
     if overlay_queues is None:
         logger.info("Overlay unavailable; defaulting to current directory.")
-        # roots: Iterator[str] | list[str] = [str(Path.cwd())]
-        roots: Iterator[str] | list[str] = [str(Path.cwd() / "packages" / "core" / "src" / "lib")]
+        roots: Iterator[str] | list[str] = [str(Path.cwd())]
     else:
         selection_queue, updates_queue = overlay_queues
         logger.info(
