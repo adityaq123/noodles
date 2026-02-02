@@ -90,6 +90,12 @@ def get_llm_client(model: Optional[str] = None) -> LLMClient:
 
     # If model looks like gemini, or only gemini key is available
     if (model and "gemini" in model.lower()) or (gemini_key and not openai_key):
-        return GeminiClient(model or "gemini-1.5-flash")
+        gemini_model = "gemini-2.0-flash"
+        if model and "gemini" in model.lower():
+             gemini_model = model
+             # Ensure we don't pass OpenAI model names to Gemini
+             if "gpt" in gemini_model.lower():
+                 gemini_model = "gemini-2.0-flash"
+        return GeminiClient(gemini_model)
     
     return OpenAIClient(model or "gpt-4o")

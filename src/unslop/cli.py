@@ -11,6 +11,7 @@ from typing import Dict, Iterator, List
 
 from dotenv import load_dotenv
 
+load_dotenv(".env.local", override=True)
 load_dotenv()
 
 from .diagram import find_d2_bin, generate_diagram, latest_diagram, render_diagram_image
@@ -143,7 +144,8 @@ def _launch_overlay_and_wait(
     updates_queue: multiprocessing.Queue[dict | None] | None = None
     if overlay_queues is None:
         logger.info("Overlay unavailable; defaulting to current directory.")
-        roots: Iterator[str] | list[str] = [str(Path.cwd())]
+        # roots: Iterator[str] | list[str] = [str(Path.cwd())]
+        roots: Iterator[str] | list[str] = [str(Path.cwd() / "packages" / "core" / "src" / "lib")]
     else:
         selection_queue, updates_queue = overlay_queues
         logger.info(
@@ -226,13 +228,14 @@ def _create_manifest(
     manifest_path = write_manifest(root, current_entries)
     run_dir = manifest_path.parent
     logger.info("Wrote manifest: %s", manifest_path)
-    if updates_queue is not None:
-        _generate_diagram(
-            root,
-            updates_queue,
-            output_dir=run_dir,
-            overview_model=overview_model,
-        )
+    logger.info("Wrote manifest: %s", manifest_path)
+    # Generate diagram even if headless
+    _generate_diagram(
+        root,
+        updates_queue,
+        output_dir=run_dir,
+        overview_model=overview_model,
+    )
 
 # Step 3b
 def _update_manifest(
@@ -259,21 +262,22 @@ def _update_manifest(
 
     if not _has_changes(summary):
         logger.info("No change detected.")
-        if updates_queue is not None:
-            _send_diagram(updates_queue, existing_diagram, render_image=False)
+        if existing_diagram:
+             _send_diagram(updates_queue, existing_diagram, render_image=False)
         return
 
     _print_summary(summary)
     manifest_path = write_manifest(root, current_entries)
     run_dir = manifest_path.parent
     logger.info("Wrote manifest: %s", manifest_path)
-    if updates_queue is not None:
-        _update_diagram(
-            root,
-            updates_queue,
-            output_dir=run_dir,
-            overview_model=overview_model,
-        )
+    logger.info("Wrote manifest: %s", manifest_path)
+    # Update diagram even if headless
+    _update_diagram(
+        root,
+        updates_queue,
+        output_dir=run_dir,
+        overview_model=overview_model,
+    )
 
 # Step 4
 def _generate_diagram(

@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import Optional
 from .llm import get_llm_client
 
+class AuthenticationError(Exception):
+    pass
+
 logger = logging.getLogger(__name__)
 _LAST_API_KEY_STATUS: Optional[str] = None
 
