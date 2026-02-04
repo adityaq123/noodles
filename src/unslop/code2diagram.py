@@ -3,13 +3,10 @@ import json
 import logging
 from pathlib import Path
 from typing import Optional
-from openai import OpenAI
-from openai import AsyncOpenAI
-try:
-    from openai import AuthenticationError
-except Exception:  # pragma: no cover - defensive fallback
-    class AuthenticationError(Exception):
-        pass
+from .llm import get_llm_client
+
+class AuthenticationError(Exception):
+    pass
 
 logger = logging.getLogger(__name__)
 _LAST_API_KEY_STATUS: Optional[str] = None
@@ -21,7 +18,7 @@ def _report_api_key_status(status: str) -> None:
         return
     _LAST_API_KEY_STATUS = status
     logger.warning(
-        "OpenAI API key status: %s",
+        "LLM API key status: %s",
         status,
         extra={"unslop_api_key_status": status},
     )
@@ -73,32 +70,27 @@ def _overview_prompt() -> str:
     )
 
 
-def generate_overview_schema(combined, model="gpt-4.1"):
-    """Use OpenAI to identify user-facing entry points; return JSON string."""
+def generate_overview_schema(combined, model=None):
+    """Use LLM to identify user-facing entry points; return JSON string."""
 
-    client = OpenAI()
-    prompt = _overview_prompt()
+    client = get_llm_client(model)
+    system_prompt = "You are a precise code analyst."
+    user_prompt = _overview_prompt() + "\n\n" + combined
 
     try:
-        resp = client.responses.create(
-            model=model,
-            input=[
-                {"role": "system", "content": "You are a precise code analyst."},
-                {"role": "user", "content": prompt + "\n\n" + combined},
-            ],
-            text={"format": {"type": "json_object"}},
-        )
+        output_text = client.generate(system_prompt, user_prompt, json_format=True)
     except Exception as exc:
         _maybe_report_auth_error(exc)
         raise
     _report_api_key_status("valid")
-    return resp.output_text
+    return output_text
 
 
-def update_overview_schema(combined, model="gpt-4.1", previous_schema=""):
+def update_overview_schema(combined, model=None, previous_schema=""):
     """Update an overview schema using changed files and a previous schema."""
-    client = OpenAI()
-    prompt = (
+    client = get_llm_client(model)
+    system_prompt = "You are a precise code analyst."
+    user_prompt = (
         _overview_prompt()
         + " You are updating an existing overview schema."
         " Input files are ONLY the files that changed."
@@ -111,31 +103,19 @@ def update_overview_schema(combined, model="gpt-4.1", previous_schema=""):
         " Use status=added for new nodes/flows, status=updated for retained ones"
         " that are affected by changes, and status=unchanged for retained ones"
         " that are not affected by changes."
+        + "\n\nPREVIOUS_SCHEMA_JSON:\n"
+        + (previous_schema or "")
+        + "\n\nCHANGED_FILES:\n"
+        + combined
     )
 
     try:
-        resp = client.responses.create(
-            model=model,
-            input=[
-                {"role": "system", "content": "You are a precise code analyst."},
-                {
-                    "role": "user",
-                    "content": (
-                        prompt
-                        + "\n\nPREVIOUS_SCHEMA_JSON:\n"
-                        + (previous_schema or "")
-                        + "\n\nCHANGED_FILES:\n"
-                        + combined
-                    ),
-                },
-            ],
-            text={"format": {"type": "json_object"}},
-        )
+        output_text = client.generate(system_prompt, user_prompt, json_format=True)
     except Exception as exc:
         _maybe_report_auth_error(exc)
         raise
     _report_api_key_status("valid")
-    return resp.output_text
+    return output_text
 
 
 def get_overview_d2_diagram(schema_path, output_dir=None):
@@ -322,7 +302,8 @@ async def generate_node_schema_and_diagram(
     async def run_request(client, node):
         node_id = node.get("id")
         payload = node.get("context", "")
-        prompt = (
+        system_prompt = "You are a precise code analyst."
+        user_prompt = (
             "You are a code analyst. Build a graph that shows the high-level"
             " data flow and control flow from incoming to outgoing using the block's"
             " files/code and its incoming/outgoing connections."
@@ -354,21 +335,15 @@ async def generate_node_schema_and_diagram(
             " }"
             " ID rules:"
             " - ids must contain only lowercase letters and underscores."
+            + "\n\nNODE CONTEXT:\n" + payload
         )
         try:
-            resp = await client.responses.create(
-                model=model,
-                input=[
-                    {"role": "system", "content": "You are a precise code analyst."},
-                    {"role": "user", "content": prompt + "\n\nNODE CONTEXT:\n" + payload},
-                ],
-                text={"format": {"type": "json_object"}},
-            )
+            output_text = await client.generate_async(system_prompt, user_prompt, json_format=True)
         except Exception as exc:
             _maybe_report_auth_error(exc)
             raise
         _report_api_key_status("valid")
-        return {"id": node_id, "json": resp.output_text}
+        return {"id": node_id, "json": output_text}
     
     node_contexts = extract_code_context()
     if include_node_ids is not None:
@@ -377,7 +352,7 @@ async def generate_node_schema_and_diagram(
         ]
         if not node_contexts:
             return []
-    client = AsyncOpenAI()
+    client = get_llm_client(model)
     tasks = [run_request(client, node) for node in node_contexts]
     results = await asyncio.gather(*tasks)
     if output_dir:
