@@ -288,7 +288,7 @@ def _generate_diagram(
     output_dir: Path | None,
     overview_model: str | None = None,
 ) -> None:
-    logger.info("Ask GPT to generate D2 diagram from manifest.")
+    logger.info("Ask LLM to generate D2 diagram from manifest.")
     diagram_path = generate_diagram(
         root,
         output_dir=output_dir,
@@ -314,7 +314,7 @@ def _update_diagram(
     output_dir: Path | None,
     overview_model: str | None = None,
 ) -> None:
-    logger.info("Ask GPT to generate D2 diagram from manifest.")
+    logger.info("Ask LLM to generate D2 diagram from manifest.")
     diagram_path = generate_diagram(
         root,
         output_dir=output_dir,
